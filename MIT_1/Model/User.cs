@@ -8,8 +8,5 @@ public class User
     public string? Password { get; set; }
     public string? Description { get; set; }
     public bool Agree { get; set; }
-    // public int? PlanId { get; set; }
-    public string? Limit { get; set; }
-
-    // public Plan? Plan { get; set; }
+    public string Limit { get; set; }
 }

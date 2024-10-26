@@ -53,9 +53,6 @@ namespace MIT_1.Controllers
             if (user == null)
                 return BadRequest("User not found");
 
-            if (user.Limit == null)
-                return BadRequest("User limit not specified");
-
             invoice.User = user;
             invoice.Limit = user.Limit;
 
