@@ -9,12 +9,22 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("CORS", corsPolicyBuilder => corsPolicyBuilder
+        .AllowAnyOrigin()
+        .AllowAnyMethod()
+        .AllowAnyHeader());
+});
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
     scope.ServiceProvider.GetService<AppDbContext>()?.Database.Migrate();
 }
+
+app.UseCors("CORS");
 
 app.UseSwagger();
 app.UseSwaggerUI();
