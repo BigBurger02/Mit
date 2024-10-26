@@ -20,18 +20,21 @@ namespace MIT_1.Controllers
         public ActionResult Get(int id)
         {
             var invoice = _db.Invoices.Find(id);
-            
+
+            if (invoice == null)
+                return NotFound();
+
             return Ok(invoice);
         }
-        
+
         [HttpGet]
         public ActionResult Get()
         {
             var invoices = _db.Invoices.ToList();
-            
+
             return Ok(invoices);
         }
-        
+
         [HttpPost]
         public ActionResult Post(Invoice newInvoice)
         {
@@ -47,32 +50,80 @@ namespace MIT_1.Controllers
             var user = _db.Users
                 .Find(newInvoice.UserId);
 
+            if (user == null)
+                return BadRequest("User not found");
+
+            if (user.Limit == null)
+                return BadRequest("User limit not specified");
+
+            invoice.User = user;
             invoice.Limit = user.Limit;
 
             CalculateCost(invoice);
-            
+
             _db.Invoices.Add(invoice);
             _db.SaveChanges();
-            
+
             return Created("", invoice);
         }
-        
+
         [HttpPut]
         public ActionResult Put(Invoice updateInvoice)
         {
             var invoice = _db.Invoices.Find(updateInvoice.Id);
 
+            if (invoice == null)
+                return NotFound();
+
             invoice.InTraffic = updateInvoice.InTraffic;
             invoice.OutTraffic = updateInvoice.OutTraffic;
             invoice.StartDate = updateInvoice.StartDate;
             invoice.EndDate = updateInvoice.EndDate;
-            
+
             CalculateCost(invoice);
-            
+
             _db.Invoices.Update(invoice);
             _db.SaveChanges();
-            
-            return Created("", invoice);
+
+            return Ok(invoice);
+        }
+
+        [HttpDelete, Route("{id}")]
+        public ActionResult Delete(int id)
+        {
+            var invoice = _db.Invoices.Find(id);
+
+            if (invoice == null)
+                return NotFound();
+
+            _db.Invoices.Remove(invoice);
+            _db.SaveChanges();
+
+            return Ok();
+        }
+
+        [HttpGet, Route("Traffic")]
+        public ActionResult GetTraffic()
+        {
+            var traffic = _db.Invoices
+                .Include(x => x.User)
+                .GroupBy(x => x.UserId)
+                .Select(x => new
+                {
+                    UserId = x.Key,
+                    UserName = x.Any() ? x.FirstOrDefault()!.User!.UserName : "",
+                    InTraffic = x.Sum(y => y.InTraffic),
+                    OutTraffic = x.Sum(y => y.OutTraffic),
+                    Limit = x.Any() ? x.FirstOrDefault()!.Limit : "",
+                    Cost = x.Sum(y => y.Cost),
+                    Currency = 7.97,
+                    TotalWithoutTax = x.Sum(y => y.Cost) * 7.97,
+                    Tax = (x.Sum(y => y.Cost) * 7.97) / 100 * 20,
+                    TotalWithTax = (x.Sum(y => y.Cost) * 7.97) + ((x.Sum(y => y.Cost) * 7.97) / 100 * 20),
+                })
+                .ToList();
+
+            return Ok(traffic);
         }
 
         private void CalculateCost(Invoice invoice)
