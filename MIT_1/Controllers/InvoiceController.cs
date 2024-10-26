@@ -128,19 +128,14 @@ namespace MIT_1.Controllers
 
         private void CalculateCost(Invoice invoice)
         {
-            if (invoice.User == null)
-            {
-                throw new ArgumentNullException();
-            }
-            
-            if (invoice.User.Limit == "600")
+            if (invoice.Limit == "600")
             {
                 if (invoice.InTraffic < 600)
                     invoice.Cost = 30;
                 else
                     invoice.Cost = invoice.InTraffic / 1000 * 50;
             }
-            if (invoice.User.Limit == "756")
+            if (invoice.Limit == "756")
             {
                 if (invoice.InTraffic < 750)
                     invoice.Cost = 73;
@@ -151,7 +146,7 @@ namespace MIT_1.Controllers
                 else
                     invoice.Cost = invoice.InTraffic / 1000 * 60;
             }
-            if (invoice.User.Limit == "1000" || invoice.User.Limit == "2000")
+            if (invoice.Limit == "1000" || invoice.Limit == "2000")
             {
                 if (invoice.InTraffic < 1000)
                     invoice.Cost = 55;
@@ -162,11 +157,11 @@ namespace MIT_1.Controllers
                 else
                     invoice.Cost = (invoice.InTraffic + invoice.OutTraffic) / 1000 * 53 * (110 - (invoice.InTraffic + invoice.OutTraffic) / 1000) / 100;
             }
-            if (invoice.User.Limit == "PURE")
+            if (invoice.Limit == "PURE")
             {
                 invoice.Cost = invoice.InTraffic / 1000 * 85;
             }
-            if (invoice.User.Limit == "FLAT")
+            if (invoice.Limit == "FLAT")
             {
                 invoice.Cost = invoice.InTraffic;
             }
